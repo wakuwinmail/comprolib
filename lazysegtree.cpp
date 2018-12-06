@@ -21,7 +21,15 @@ private:
     std::vector<T> node;
     std::vector<T> lazy;
 public:
-    explicit LazySegmentTree(int sz,F cal,G upd,H ecal,P rcal=[](T a,int b){return a;},T initv=0,E opinitv=0){
+    explicit LazySegmentTree(
+        int sz,
+        F cal,
+        G upd,
+        H ecal,
+        P rcal=[](T a,int b){return a;},
+        T initv=0,
+        E opinitv=0
+        ){
         n=1;
         f=cal;
         g=upd;

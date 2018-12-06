@@ -16,7 +16,12 @@ private:
     std::vector<T> node;
  
 public:
-    explicit SegmentTree(int sz,F cal,F upd,T initv=std::numeric_limits<T>::max()){
+    explicit SegmentTree(
+        int sz,
+        F cal,
+        F upd,
+        T initv=std::numeric_limits<T>::max()
+        ){
         n=1;
         init=initv;
         f=cal;
