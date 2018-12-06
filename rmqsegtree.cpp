@@ -12,7 +12,7 @@ private:
     std::vector<T> node;
  
 public:
-    explicit SegmentTree(int sz,T initv=INT32_MAX){
+    explicit SegmentTree(int sz,T initv=std::numeric_limits<T>::max()){
         n=1;
         init=initv;
         while(n<sz)n=n*2;
