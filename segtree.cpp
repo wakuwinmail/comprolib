@@ -12,13 +12,15 @@ private:
     int n;
     T init;
     F f;
+    F g;
     std::vector<T> node;
  
 public:
-    explicit SegmentTree(int sz,F func,T initv=std::numeric_limits<T>::max()){
+    explicit SegmentTree(int sz,F cal,F upd,T initv=std::numeric_limits<T>::max()){
         n=1;
         init=initv;
-        f=func;
+        f=cal;
+        g=upd;
         while(n<sz)n=n*2;
         node.resize(static_cast<unsigned int>(2 * n - 1), init);
         for (int i = 0; i <sz ; ++i) node[i+n-1]=init;
@@ -27,7 +29,7 @@ public:
  
     void update(int x, T val){//x:0-indexed
         x+=n-1;
-        node[x]=val;
+        node[x]=g(node[x],val);
         while(x>0){
             x=(x-1)/2;
             node[x]=f(node[2*x+1],node[2*x+2]);
@@ -48,6 +50,7 @@ void solve(){
     std::cin>>n>>q;
     SegmentTree<int> st(n,
         [](int a,int b){return std::min(a,b);},//example for RMQ
+        [](int a,int b){return b;},
         INT32_MAX
     );
     for(size_t i = 0; i < q; i++)
