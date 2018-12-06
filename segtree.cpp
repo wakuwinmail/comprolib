@@ -11,8 +11,8 @@ private:
     typedef std::function<T(T,T)> F;
     int n;
     T init;
-    F f;
-    F g;
+    F f;//function for caliculate
+    F g;//function for update
     std::vector<T> node;
  
 public:
