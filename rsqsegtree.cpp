@@ -2,21 +2,24 @@
 #include <iostream>
 #include <vector>
 
+template <typename T>
 struct SegmentTree{
 private:
     int n;
-    std::vector<int> node;
+    T init;
+    std::vector<T> node;
  
 public:
-    explicit SegmentTree(int sz){
+    explicit SegmentTree(int sz,T initv=0){
         n=1;
+        init=initv;
         while(n<sz)n=n*2;
-        node.resize(static_cast<unsigned int>(2 * n - 1), 0);
-        for (int i = 0; i <sz ; ++i) node[i+n-1]=0;
+        node.resize(static_cast<unsigned int>(2 * n - 1), init);
+        for (int i = 0; i <sz ; ++i) node[i+n-1]=init;
         for (int i = n-2; i >= 0 ; --i) node[i]=node[2*i+1]+node[2*i+2];
     }
  
-    void update(int x, int val){//x:0-indexed
+    void update(int x, T val){//x:0-indexed
         x+=n-1;
         node[x]+=val;
         while(x>0){
@@ -25,7 +28,7 @@ public:
         }
     }
  
-    int getsum(int p,int q,int k=0,int l=0,int r=-1){//[p,q):0-indexed
+    T getsum(int p,int q,int k=0,int l=0,int r=-1){//[p,q):0-indexed
         if(r<0)r=n;
         if(r<=p||l>=q)return 0;
         if(p<=l&&r<=q)return node[k];
@@ -37,7 +40,7 @@ public:
 void solve(){
     int n,q;
     std::cin>>n>>q;
-    SegmentTree st(n);
+    SegmentTree<int> st(n);
     for(size_t i = 0; i < q; i++)
     {
         int com,x,y;

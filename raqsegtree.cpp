@@ -3,25 +3,28 @@
 #include <vector>
 #include <algorithm>
 
+template <typename T>
 struct LazySegmentTree{
 private:
     int n;
-    std::vector<long> node;
-    std::vector<long> lazy;
+    T init;
+    std::vector<T> node;
+    std::vector<T> lazy;
 public:
-    explicit LazySegmentTree(int sz){
+    explicit LazySegmentTree(int sz,T initv=0){
         n=1;
+        init=initv;
         while(n<sz)n=n*2;
-        node.resize(static_cast<unsigned int>(2 * n - 1), 0);
-        for (int i = 0; i <sz ; ++i) node[i+n-1]=0;
+        node.resize(static_cast<unsigned int>(2 * n - 1), init);
+        for (int i = 0; i <sz ; ++i) node[i+n-1]=init;
         for (int i = n-2; i >= 0 ; --i) node[i]=node[2*i+1]+node[2*i+2];
 
-        lazy.resize(static_cast<unsigned int>(2 * n - 1), 0);
-        for (int i = 0; i <sz ; ++i) lazy[i+n-1]=0;
+        lazy.resize(static_cast<unsigned int>(2 * n - 1), init);
+        for (int i = 0; i <sz ; ++i) lazy[i+n-1]=init;
         for (int i = n-2; i >= 0 ; --i) lazy[i]=lazy[2*i+1]+lazy[2*i+2];
     }
 
-    void add(int p,int q,int val,int k=0,int l=0,int r=-1){//[p,q):0-indexed
+    void add(int p,int q,T val,int k=0,int l=0,int r=-1){//[p,q):0-indexed
         if(r<0)r=n;
         update(k);
         if(r<=p||l>=q)return;
@@ -36,14 +39,14 @@ public:
         }
     }
 
-    long getsum(int p,int q,int k=0,int l=0,int r=-1){//[p,q):0-indexed
+    T getsum(int p,int q,int k=0,int l=0,int r=-1){//[p,q):0-indexed
         if(r<0)r=n;
         if(r<=p||l>=q)return 0;
 
         update(k);
         if(p<=l&&r<=q)return node[k];
-        long vl=getsum(p,q,2*k+1,l,(l+r)/2);
-        long vr=getsum(p,q,2*k+2,(l+r)/2,r);
+        T vl=getsum(p,q,2*k+1,l,(l+r)/2);
+        T vr=getsum(p,q,2*k+2,(l+r)/2,r);
         return vl+vr;
     }
 
@@ -62,7 +65,7 @@ public:
 void solve(){
     int n,q;
     std::cin>>n>>q;
-    LazySegmentTree st(n);
+    LazySegmentTree<long> st(n);
     for(size_t i = 0; i < q; i++)
     {
         int com,x,p,q;
