@@ -7,29 +7,29 @@
 template <typename T,typename E>
 struct LazySegmentTree{
 private:
-    typedef std::function<T(T,T)> F;
-    typedef std::function<T(T,E)> G;
-    typedef std::function<E(E,E)> H;
-    typedef std::function<E(E,int)> P;
+    typedef function<T(T,T)> F;
+    typedef function<T(T,E)> G;
+    typedef function<E(E,E)> H;
+    typedef function<E(E,int)> P;
     int n;
-    T init;
+    vector<T> init;
     E opinit;
     F f;//function for caliculate
     G g;//function for update
     H h;//function for evaluate
     P p;//function for range calculate
-    std::vector<T> node;
-    std::vector<T> lazy;
+    vector<T> node;
+    vector<E> lazy;
 public:
     explicit LazySegmentTree(
-        int sz,
-        F cal,
-        G upd,
-        H ecal,
-        P rcal=[](T a,int b){return a;},
-        T initv=0,
-        E opinitv=0
-        ){
+            int sz,
+            F cal,
+            G upd,
+            H ecal,
+            P rcal=[](T a,int b){return a;},
+            vector<T> initv=vector<T>(1,0),
+            E opinitv=0
+    ){
         n=1;
         f=cal;
         g=upd;
@@ -38,21 +38,21 @@ public:
         init=initv;
         opinit=opinitv;
         while(n<sz)n=n*2;
-        node.resize(static_cast<unsigned int>(2 * n - 1), init);
-        for (int i = 0; i <sz ; ++i) node[i+n-1]=init;
+        node.resize(static_cast<unsigned int>(2 * n - 1), init[0]);//はみ出る分は0番地に指定
+        for (int i = 0; i <sz ; ++i) node[i+n-1]=init[i+1];
         for (int i = n-2; i >= 0 ; --i) node[i]=f(node[2*i+1],node[2*i+2]);
 
-        lazy.resize(static_cast<unsigned int>(2 * n - 1), init);
+        lazy.resize(static_cast<unsigned int>(2 * n - 1), opinit);
         for (int i = 0; i <sz ; ++i) lazy[i+n-1]=opinit;
-        for (int i = n-2; i >= 0 ; --i) lazy[i]=f(lazy[2*i+1],lazy[2*i+2]);
+        for (int i = n-2; i >= 0 ; --i) lazy[i]=h(lazy[2*i+1],lazy[2*i+2]);
     }
 
-    void update(int p,int q,T val,int k=0,int l=0,int r=-1){//[p,q):0-indexed
+    void update(int p,int q,E val,int k=0,int l=0,int r=-1){//[p,q):0-indexed
         if(r<0)r=n;
         eval(k,r-l);
         if(r<=p||l>=q)return;
         if(p<=l&&r<=q){
-            lazy[k]=g(lazy[k],val);
+            lazy[k]=h(lazy[k],val);
             eval(k,r-l);
         }
         else{
@@ -64,7 +64,7 @@ public:
 
     T query(int p,int q,int k=0,int l=0,int r=-1){//[p,q):0-indexed
         if(r<0)r=n;
-        if(r<=p||l>=q)return 0;
+        if(r<=p||l>=q)return init[0];
 
         eval(k,r-l);
         if(p<=l&&r<=q)return node[k];
@@ -77,8 +77,8 @@ public:
         if(lazy[k]==opinit)return;
         node[k]=g(node[k],p(lazy[k],len));
         if(k<n-1){
-                lazy[2*k+1]=h(lazy[2*k+1],lazy[k]);
-                lazy[2*k+2]=h(lazy[2*k+2],lazy[k]);
+            lazy[2*k+1]=h(lazy[2*k+1],lazy[k]);
+            lazy[2*k+2]=h(lazy[2*k+2],lazy[k]);
         }
         lazy[k]=opinit;
     }
