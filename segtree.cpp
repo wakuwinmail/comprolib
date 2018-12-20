@@ -11,7 +11,7 @@ private:
     typedef std::function<T(T,T)> F;
     typedef std::function<T(T,E)> G;
     int n;
-    vector<T> init;
+    std::vector<T> init;
     F f;//function for caliculate
     G g;//function for update
     std::vector<T> node;
@@ -21,7 +21,7 @@ public:
             int sz,
             F cal,
             G upd,
-            vector<T> initv=vector<T>(1,0)
+            std::vector<T> initv=std::vector<T>(1,0)
     ){
         n=1;
         init=initv;
@@ -54,10 +54,9 @@ public:
 void solve(){
     int n,q;
     std::cin>>n>>q;
-    SegmentTree<int> st(n,
+    SegmentTree<int,int> st(n,
         [](int a,int b){return std::min(a,b);},//example for RMQ
-        [](int a,int b){return b;},
-        INT32_MAX
+        [](int a,int b){return b;}
     );
     for(size_t i = 0; i < q; i++)
     {
