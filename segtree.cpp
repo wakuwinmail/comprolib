@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <functional>
 
-template <typename T,E>
+template <typename T,typename E>
 struct SegmentTree{
 private:
     typedef std::function<T(T,T)> F;
@@ -44,7 +44,7 @@ public:
 
     T query(int p,int q,int k=0,int l=0,int r=-1){//[p,q):0-indexed
         if(r<0)r=n;
-        if(r<=p||l>=q)return init;//out of range
+        if(r<=p||l>=q)return init[0];//out of range
         if(p<=l&&r<=q)return node[k];
 
         return f(query(p,q,2*k+1,l,(l+r)/2),query(p,q,2*k+2,(l+r)/2,r));
