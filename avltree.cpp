@@ -79,7 +79,7 @@ private:
         return lh-rh;
     }
 
-    node* adjustL(node* u){//insert form left, erace from right
+    node* adjustL(node* u){//insert from left, erase from right
         if(!change)return u;
         int h=u->height;
         if(bias(u)==2){
@@ -91,7 +91,7 @@ private:
         return u;
     }
 
-    node* adjustR(node* u){//insert form right, erace from left
+    node* adjustR(node* u){//insert from right, erase from left
         if(!change)return u;
         int h=u->height;
         //std::cout<<"in adjust2"<<std::endl;
@@ -108,12 +108,13 @@ private:
 public:
     E* find(T k){
         node* u=root;
-        while(true){
-            if(!u)return nullptr;
-            if(u->key==k)return &u->value;
-            else if(u->key<k)u=u->right;
-            else u=u->left;
+        while(u!=nullptr){
+            if(u->key<k)u=u->right;
+            else if(u->key>k)u=u->left;
+            else return &u->value;
         }
+        //std::cout<<"key:"<<k<<" is nullptr"<<std::endl;
+        return nullptr;
     }
 
 public:
@@ -125,16 +126,15 @@ private:
     node* insert(node* u,T k,E v){
         if(u==nullptr){
             change=true;
-            node ret=node(k,v,1);
-            node* retp=&ret;
-            return retp;
+            //std::cout<<"key:"<<k<<" value:"<<v<<" inserted"<<std::endl;
+            return new node(k,v,1);
         }
         else if(u->key<k){
-            u->left=insert(u->left,k,v);
+            u->right=insert(u->right,k,v);
             return adjustL(u);
         }
         else if(u->key>k){
-            u->right=insert(u->right,k,v);
+            u->left=insert(u->left,k,v);
             return adjustR(u);
         }
         else{
@@ -146,21 +146,21 @@ private:
 
 public:
     void erase(T k){
-        root=erace(root,k);
+        root=erase(root,k);
     }
 
 private:
-    node* erace(node* u,T k){
+    node* erase(node* u,T k){
         if(u==nullptr){
             change=false;
             return nullptr;
         }
         else if(u->key<k){
-            u->left=erace(u->left,k);
+            u->left=erase(u->left,k);
             return adjustR;
         }
         else if(u->key>k){
-            u->right=erace(u->right,k);
+            u->right=erase(u->right,k);
             return adjustL;
         }
         else{
@@ -169,7 +169,7 @@ private:
                 return u->right;
             }
             else{
-                u->left=eracemax(u->left);
+                u->left=erasemax(u->left);
                 u->key=lmaxkey;
                 u->value=lmaxvalue;
                 return adjustR(u);
@@ -177,9 +177,9 @@ private:
         }
     }
 
-    node* eracemax(node* u){
+    node* erasemax(node* u){
         if(u->right){
-            u->right=eracemax(u->right);
+            u->right=erasemax(u->right);
             return adjustL(u);
         }
         else{
@@ -192,23 +192,27 @@ private:
 };
 
 void solve(){
-    int m,q;
-    std::cin>>m>>q;
+    int q;
+    //std::cin>>q;
     AVLTree<int,int> at;
-    for(int i=0;i<m;++i){
-        int k,v;
-        std::cin>>k>>v;
-        at.insert(k,v);
-    }
-    for(int i=0;i<q;++i){
-        int k;
-        std::cin>>k;
-        auto it=at.find(k);
-        if(!it){
-            std::cout<<"not exist"<<std::endl;
+    while(true){
+        char c;
+        std::cin>>c;
+        if(c=='i'){
+            int k,v;
+            std::cin>>k>>v;
+            at.insert(k,v);
         }
-        else{
-            std::cout<<"key:"<<k<<" value:"<<*it<<std::endl;
+        else if(c=='f'){
+            int k;
+            std::cin>>k;
+            auto it=at.find(k);
+            if(it==nullptr){
+                std::cout<<"key:"<<k<<" is not exist"<<std::endl;
+            }
+            else{
+                std::cout<<"key:"<<k<<" value:"<<*it<<std::endl;
+            }
         }
     }
 }
