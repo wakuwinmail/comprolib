@@ -9,17 +9,15 @@ private:
 public:
     T key;
     E value;
-    node* parent;
     node* left;
     node* right;
     int height;
-    explicit avl_node(T k,E v,node* p){
+    explicit avl_node(T k,E v,int h){
         key=k;
         value=v;
-        parent=p;
         left=nullptr;
         right=nullptr;
-        height=1;
+        height=h;
     }
 };
 
@@ -28,7 +26,17 @@ struct AVLTree{
 private:
     typedef avl_node<T,E> node;
     node* root;
+    bool change;
+    T lmaxkey;
+    E lmaxvalue;
 
+public:
+    explicit AVLTree(){
+        root=nullptr;
+        change=false;
+    }
+
+private:
     void updateheight(node *u){
         int lh=0,rh=0;
         if(u->left!= nullptr)lh=u->left->height;
@@ -36,42 +44,32 @@ private:
         u->height=std::max(lh,rh)+1;
     }
 
-    void rotateR(node *u){
-        node* p=u->parent;
+    node* rotateR(node *u){
         node* v=u->left;
-        v->parent=p;
         u->left=v->right;
         v->right=u;
-        if(p!= nullptr){
-            if(p->left==u)p->left=v;
-            else p->right=v;
-        }
         updateheight(u);
         updateheight(v);
+        return v;
     }
 
-    void rotateL(node* u){
-        node* p=u->parent;
+    node* rotateL(node* u){
         node* v=u->right;
-        v->parent=p;
         u->right=v->left;
         v->left=u;
-        if(p!= nullptr){
-            if(p->left==u)p->left=v;
-            else p->right=v;
-        }
         updateheight(u);
         updateheight(v);
+        return v;
     }
 
-    void rotateLR(node* u){
-        rotateL(u->left);
-        rotateR(u);
+    node* rotateLR(node* u){
+        u->left=rotateL(u->left);
+        return rotateR(u);
     }
 
-    void rotateRL(node* u){
-        rotateR(u->right);
-        rotateL(u);
+    node* rotateRL(node* u){
+        u->right=rotateR(u->right);
+        return rotateL(u);
     }
 
     int bias(node* u){
@@ -81,34 +79,33 @@ private:
         return lh-rh;
     }
 
-    bool adjust1(node* u){//insert form left, erace from right
+    node* adjustL(node* u){//insert form left, erace from right
+        if(!change)return u;
         int h=u->height;
         if(bias(u)==2){
-            if(bias(u)>= 0)rotateR(u);
-            else rotateLR(u);
+            if(bias(u->left)>= 0)u=rotateR(u);
+            else u=rotateLR(u);
         }
         updateheight(u);
-        return h!=u->height;
+        change=h!=u->height;
+        return u;
     }
 
-    bool adjust2(node* u){//insert form right, erace from left
+    node* adjustR(node* u){//insert form right, erace from left
+        if(!change)return u;
         int h=u->height;
-        std::cout<<"in adjust2"<<std::endl;
+        //std::cout<<"in adjust2"<<std::endl;
         if(bias(u)==-2){
-            if(bias(u) <= 0)rotateL(u);
-            else rotateRL(u);
+            if(bias(u->right) <= 0)u=rotateL(u);
+            else u=rotateRL(u);
         }
-        std::cout<<"upd h not complete"<<std::endl;
+        //std::cout<<"upd h not complete"<<std::endl;
         updateheight(u);
-
-        std::cout<<"upd h complete"<<std::endl;
-        return h!=u->height;
+        change=h!=u->height;
+        //std::cout<<"upd h complete"<<std::endl;
+        return u;
     }
 public:
-    explicit AVLTree(){
-        root=nullptr;
-    }
-
     E* find(T k){
         node* u=root;
         while(true){
@@ -119,139 +116,78 @@ public:
         }
     }
 
+public:
     void insert(T k,E v){
-        node* u=root;
-        bool froml=false;
-        while(true){
-            if(!u){
-                node t=node(k,v,u);
-                root=&t;
-                u=root;
-                break;
-            }
-            if(u->key==k){
-                u->value=v;
-                break;
-            }
-            else if(u->key<k){
-                std::cout<<"u->key < k"<<std::endl;
-                if(u->right== nullptr){
-                    std::cout<<"right null"<<std::endl;
-                    node t=node(k,v,u);
-                    u->right=&t;
-                    break;
-                }
-                u=u->right;
-            }
-            else{
-                if(u->left== nullptr){
-                    node t=node(k,v,u);
-                    u->left=&t;
-                    u->left->parent=u;
-                    froml=true;
-                    break;
-                }
-                u=u->left;
-            }
-        }
-        bool change=true;
-        while(change){
-            if(froml)change=adjust1(u);
-            else change=adjust2(u);
-
-            if(u->parent== nullptr)break;
-            else {
-                if(u->parent->left==u)froml=true;
-                else froml=false;
-            }
-            u=u->parent;
-        }
-        std::cout<<"insert complete"<<std::endl;
+        root=insert(root,k,v);
     }
 
+private:
+    node* insert(node* u,T k,E v){
+        if(u==nullptr){
+            change=true;
+            node ret=node(k,v,1);
+            node* retp=&ret;
+            return retp;
+        }
+        else if(u->key<k){
+            u->left=insert(u->left,k,v);
+            return adjustL(u);
+        }
+        else if(u->key>k){
+            u->right=insert(u->right,k,v);
+            return adjustR(u);
+        }
+        else{
+            change=false;
+            u->value=v;
+            return u;
+        }
+    }
+
+public:
     void erase(T k){
-        node* u=root,cu;
-        if(!u)return;
-        bool froml=false;
-        while(true){
-            if(u->key==k){
-                node* p=u->parent;
-                if(!u->left&&!u->right){//u is leaf
-                    if(!u->parent){root=nullptr;return;}
+        root=erace(root,k);
+    }
 
-                    if(p->left==u){p->left=nullptr;froml=true;}
-                    else p->right=nullptr;
-                    cu=p;
-                }
-                else if(!u->left||!u->right){
-                    if(!u->left){//left is nullptr
-                        if(!p){root=u->right;return;}
-
-                        if(p->left==u){p->left=u->right;froml=true;}
-                        else p->right=u->right;
-                    }
-                    else{//right is nullptr
-                        if(!p){root=u->left;return;}
-
-                        if(p->left==u){p->left=u->left;froml=true;}
-                        else p->right=u->leaf;
-                    }
-                    cu=p;
-                }
-                else{//u have left&right subtree
-                    node* v=u->left;
-                    while(v->right){
-                        v=v->right;
-                    }
-
-                    node* vp=v->parent;
-                    if(!v->left){//v doesn't have left subtree
-                        if(vp->left==v){vp->left=nullptr;froml=true;}
-                        else vp->right=nullptr;
-                    }
-                    else {
-                        if(vp->left==v){vp->left=v->left;froml=true;}
-                        else vp->right=v->left;
-                    }
-                    v->left=u->left;
-                    v->right=u->right;
-                    v->parent=u->parent;
-
-                    if(p->left==u)p->left=v;
-                    else p->right=v;
-                    cu=vp;
-                }
-                break;
-            }
-            else if(u->key<k){
-                if(!u->right){
-                    return;
-                }
-                u=u->right;
-                froml=false;
+private:
+    node* erace(node* u,T k){
+        if(u==nullptr){
+            change=false;
+            return nullptr;
+        }
+        else if(u->key<k){
+            u->left=erace(u->left,k);
+            return adjustR;
+        }
+        else if(u->key>k){
+            u->right=erace(u->right,k);
+            return adjustL;
+        }
+        else{
+            if(u->left==nullptr){
+                change=true;
+                return u->right;
             }
             else{
-                if(!u->left){
-                    return;
-                }
-                u=u->left;
-                froml=true;
+                u->left=eracemax(u->left);
+                u->key=lmaxkey;
+                u->value=lmaxvalue;
+                return adjustR(u);
             }
         }
-        //cu is root node to change
-        bool change=true;
-        while(change){
-            if(!froml)change=adjust1(cu);
-            else change=adjust2(cu);
+    }
 
-            if(!cu->parent)break;
-            else {
-                if(cu->parent->left==cu)froml=true;
-                else froml=false;   
-            }
-            cu=cu->parent;
+    node* eracemax(node* u){
+        if(u->right){
+            u->right=eracemax(u->right);
+            return adjustL(u);
         }
-
+        else{
+            change=true;
+            lmaxkey=u->key;
+            lmaxvalue=u->value;
+            return u->left;
+        }
     }
 };
 
