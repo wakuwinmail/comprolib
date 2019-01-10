@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <cassert>
 
 template<typename T,typename E>
 struct avl_node{
@@ -31,7 +32,7 @@ private:
     bool change;
     T lmaxkey;
     E lmaxvalue;
-
+    int lmaxsize;
 public:
     explicit AVLTree(){
         root=nullptr;
@@ -175,12 +176,12 @@ private:
         else if(u->key<k){
             u->right=erase(u->right,k);
             --u->size;
-            return adjustR(u);
+            return adjustL(u);
         }
         else if(u->key>k){
             u->left=erase(u->left,k);
             --u->size;
-            return adjustL(u);
+            return adjustR(u);
         }
         else{
             if(u->left==nullptr){
@@ -192,13 +193,16 @@ private:
                 u->left=erasemax(u->left);
                 u->key=lmaxkey;
                 u->value=lmaxvalue;
+                u->size=lmaxsize;
+                u->size+=size(u->right);
+                //std::cout<<"lmaxsize:"<<lmaxsize<<std::endl;
                 return adjustR(u);
             }
         }
     }
 
     node* erasemax(node* u){
-        if(u->right){
+        if(u->right!=nullptr){
             u->right=erasemax(u->right);
             --u->size;
             return adjustL(u);
@@ -207,6 +211,7 @@ private:
             change=true;
             lmaxkey=u->key;
             lmaxvalue=u->value;
+            lmaxsize=u->size;
             return u->left;
         }
     }
@@ -218,7 +223,8 @@ public:
 
 private:
     node* min(node* u,int x){
-        //std::cout<<u->key<<" "<<u->size<<std::endl;
+        std::cout<<u->key<<" "<<u->size<<std::endl;
+        assert(u!=nullptr);
 
         node* v=u->left;
         node* w=u->right;
@@ -239,6 +245,7 @@ void solve(){
     int q;
     std::cin>>q;
     AVLTree<int,int> at;
+    /*
     for(int i=0;i<q;++i){
         char c;
         std::cin>>c;
@@ -259,7 +266,7 @@ void solve(){
             std::cout<<"key:"<<x<<" value:"<<*pt<<std::endl;
         }
     }
-    /*
+    */
     for(int i=0;i<q;++i){
         int t,x;
         std::cin>>t>>x;
@@ -272,7 +279,6 @@ void solve(){
             at.erase(y);
         }
     }
-    */
 }
 
 int main(){
