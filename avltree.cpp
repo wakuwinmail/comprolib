@@ -193,8 +193,7 @@ private:
                 u->left=erasemax(u->left);
                 u->key=lmaxkey;
                 u->value=lmaxvalue;
-                u->size=lmaxsize;
-                u->size+=size(u->right);
+                --u->size;
                 //std::cout<<"lmaxsize:"<<lmaxsize<<std::endl;
                 return adjustR(u);
             }
@@ -223,7 +222,7 @@ public:
 
 private:
     node* min(node* u,int x){
-        std::cout<<u->key<<" "<<u->size<<std::endl;
+        //std::cout<<u->key<<" "<<u->size<<std::endl;
         assert(u!=nullptr);
 
         node* v=u->left;
