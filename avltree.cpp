@@ -12,12 +12,14 @@ public:
     node* left;
     node* right;
     int height;
+    int size;
     explicit avl_node(T k,E v,int h){
         key=k;
         value=v;
         left=nullptr;
         right=nullptr;
         height=h;
+        size=1;
     }
 };
 
@@ -37,17 +39,26 @@ public:
     }
 
 private:
+    int height(node* u){
+        return u==nullptr?0:u->height;
+    }
+
+    int size(node* u){
+        return u==nullptr?0:u->size;
+    }
+
     void updateheight(node *u){
-        int lh=0,rh=0;
-        if(u->left!= nullptr)lh=u->left->height;
-        if(u->right!= nullptr)rh=u->right->height;
-        u->height=std::max(lh,rh)+1;
+        u->height=std::max(height(u->left),height(u->right))+1;
     }
 
     node* rotateR(node *u){
         node* v=u->left;
         u->left=v->right;
         v->right=u;
+
+        u->size-=size(v->left)+1;
+        v->size+=size(u->right)+1;
+
         updateheight(u);
         updateheight(v);
         return v;
@@ -57,6 +68,10 @@ private:
         node* v=u->right;
         u->right=v->left;
         v->left=u;
+
+        u->size-=size(v->right)+1;
+        v->size+=size(u->left)+1;
+
         updateheight(u);
         updateheight(v);
         return v;
@@ -131,11 +146,13 @@ private:
         }
         else if(u->key<k){
             u->right=insert(u->right,k,v);
-            return adjustL(u);
+            ++u->size;
+            return adjustR(u);
         }
         else if(u->key>k){
             u->left=insert(u->left,k,v);
-            return adjustR(u);
+            ++u->size;
+            return adjustL(u);
         }
         else{
             change=false;
@@ -156,15 +173,18 @@ private:
             return nullptr;
         }
         else if(u->key<k){
-            u->left=erase(u->left,k);
-            return adjustR;
+            u->right=erase(u->right,k);
+            --u->size;
+            return adjustR(u);
         }
         else if(u->key>k){
-            u->right=erase(u->right,k);
-            return adjustL;
+            u->left=erase(u->left,k);
+            --u->size;
+            return adjustL(u);
         }
         else{
             if(u->left==nullptr){
+                //std::cout<<"erase"<<std::endl;
                 change=true;
                 return u->right;
             }
@@ -180,6 +200,7 @@ private:
     node* erasemax(node* u){
         if(u->right){
             u->right=erasemax(u->right);
+            --u->size;
             return adjustL(u);
         }
         else{
@@ -189,32 +210,69 @@ private:
             return u->left;
         }
     }
+
+public:
+    T min(int x=0){//return x-th minimum key
+        return min(root,x)->key;
+    }
+
+private:
+    node* min(node* u,int x){
+        //std::cout<<u->key<<" "<<u->size<<std::endl;
+
+        node* v=u->left;
+        node* w=u->right;
+
+        if(size(v)<x){//go right subtree
+            return min(w,x-1-size(v));
+        }
+        else if(size(v)>x){//go left subtree
+            return min(v,x);
+        }
+        else {
+            return u;
+        }
+    }
 };
 
 void solve(){
     int q;
-    //std::cin>>q;
+    std::cin>>q;
     AVLTree<int,int> at;
-    while(true){
+    for(int i=0;i<q;++i){
         char c;
         std::cin>>c;
         if(c=='i'){
-            int k,v;
-            std::cin>>k>>v;
-            at.insert(k,v);
+            int x,y;
+            std::cin>>x>>y;
+            at.insert(x,y);
+        }
+        else if(c=='e'){
+            int x;
+            std::cin>>x;
+            at.erase(x);
         }
         else if(c=='f'){
-            int k;
-            std::cin>>k;
-            auto it=at.find(k);
-            if(it==nullptr){
-                std::cout<<"key:"<<k<<" is not exist"<<std::endl;
-            }
-            else{
-                std::cout<<"key:"<<k<<" value:"<<*it<<std::endl;
-            }
+            int x;
+            std::cin>>x;
+            auto pt=at.find(x);
+            std::cout<<"key:"<<x<<" value:"<<*pt<<std::endl;
         }
     }
+    /*
+    for(int i=0;i<q;++i){
+        int t,x;
+        std::cin>>t>>x;
+        if(t==1){
+            at.insert(x,x);
+        }
+        else {
+            int y=at.min(x-1);
+            std::cout<<y<<std::endl;
+            at.erase(y);
+        }
+    }
+    */
 }
 
 int main(){
