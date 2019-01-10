@@ -14,7 +14,7 @@ private:
     int n;
     vector<T> init;
     E opinit;
-    F f;//function for caliculate
+    F f;//function for merge
     G g;//function for update
     H h;//function for evaluate
     P p;//function for range calculate

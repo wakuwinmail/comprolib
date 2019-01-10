@@ -12,7 +12,7 @@ private:
     typedef std::function<T(T,E)> G;
     int n;
     std::vector<T> init;
-    F f;//function for caliculate
+    F f;//function for merge
     G g;//function for update
     std::vector<T> node;
 
