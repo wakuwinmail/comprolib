@@ -1,7 +1,7 @@
-//https://arc033.contest.atcoder.jp/submissions/3973744
 #include <iostream>
 #include <algorithm>
 #include <cassert>
+#include <functional>
 
 template<typename T,typename E>
 struct avl_node{
@@ -29,6 +29,8 @@ template<typename T,typename E>
 struct AVLTree{
 private:
     typedef avl_node<T,E> node;
+    typedef std::function<node*(node*,node*)> F;
+    typedef std::function<node*(node*)> G;
     node* root;
     bool change;
     T lmaxkey;
@@ -217,12 +219,12 @@ private:
     }
 
 public:
-    T min(int x=0){//return x-th minimum key
+    T nth_min(int x=0){//return x-th minimum key, x is 0 indexed
         return min(root,x)->key;
     }
 
 private:
-    node* min(node* u,int x){
+    node* nth_min(node* u,int x){
         //std::cout<<u->key<<" "<<u->size<<std::endl;
         assert(u!=nullptr);
 
@@ -239,12 +241,102 @@ private:
             return u;
         }
     }
+
+public:
+    node* range_query(T l,T r,F f){//[l,r) 2項演算(最小値など) 可換であるもの
+        return range_query(root,l,r,f);
+    }
+
+    node* range_query(T l,T r,G g){//[l,r) 単項演算
+        return range_query(root,l,r,g);
+    }
+private:
+    node* range_query(node* u,T l,T r,F f){
+        if(u==nullptr)return nullptr;
+        
+        if(u->key<l)return range_query(u->right,l,r,f);
+        else if(u->key>=r)return range_query(u->left,l,r,f);
+        else{
+            node* v=range_query(u->left,l,r,f);
+            node* w=range_query(u->right,l,r,f);
+            if(v==nullptr){
+                if(w==nullptr)return u;
+                return f(u,w);
+            }
+            else if(w==nullptr){
+                return f(u,v);
+            }
+            else return f(f(u,v),w);
+        }
+    }
+
+    node* range_query(node* u,T l,T r,G g){
+        if(u==nullptr)return nullptr;
+        
+        if(u->key<l)return range_query(u->right,l,r,g);
+        else if(u->key>=r)return range_query(u->left,l,r,g);
+        else{
+            node* v=range_query(u->left,l,r,g);
+            node* w=range_query(u->right,l,r,g);
+            return g(u);
+        }
+    }
 };
 
 void solve(){
+    /*
+    //https://atcoder.jp/contests/arc033/tasks/arc033_3
     int q;
     std::cin>>q;
     AVLTree<int,int> at;
+    for(int i=0;i<q;++i){
+        int t,x;
+        std::cin>>t>>x;
+        if(t==1){
+            at.insert(x,x);
+        }
+        else {
+            int y=at.nth_min(x-1);
+            std::cout<<y<<std::endl;
+            at.erase(y);
+        }
+    }
+    */
+
+    //http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1508
+    int n,q;
+    std::cin>>n>>q;
+    AVLTree<int,int> at;
+    for(size_t i = 0; i < n; ++i)
+    {
+        int a;
+        std::cin>>a;
+        at.insert(i,a);
+    }
+    
+    for(size_t i = 0; i < q; ++i)
+    {
+        int x,l,r;
+        std::cin>>x>>l>>r;
+        if(x==0){
+            /*
+            at.range_query(l,r+1,[](node* a){
+                if(a->key>=l&&a->key<=r){
+                    if(a->key==r)a->
+                }
+            })
+            */
+        }
+        else if(x==1){
+            auto ret=at.range_query(l,r+1,[](avl_node<int,int>* a,avl_node<int,int>* b){return a->value<b->value ? a : b;});
+            std::cout<<ret->value<<std::endl;
+        }
+        else{
+            at.insert(l,r);
+        }
+    }
+    
+
     /*
     for(int i=0;i<q;++i){
         char c;
@@ -267,18 +359,7 @@ void solve(){
         }
     }
     */
-    for(int i=0;i<q;++i){
-        int t,x;
-        std::cin>>t>>x;
-        if(t==1){
-            at.insert(x,x);
-        }
-        else {
-            int y=at.min(x-1);
-            std::cout<<y<<std::endl;
-            at.erase(y);
-        }
-    }
+    
 }
 
 int main(){

@@ -7,10 +7,10 @@
 template <typename T,typename E>
 struct LazySegmentTree{
 private:
-    typedef function<T(T,T)> F;
-    typedef function<T(T,E)> G;
-    typedef function<E(E,E)> H;
-    typedef function<E(E,int)> P;
+    typedef std::function<T(T,T)> F;
+    typedef std::function<T(T,E)> G;
+    typedef std::function<E(E,E)> H;
+    typedef std::function<E(E,int)> P;
     int n;
     vector<T> init;
     E opinit;
