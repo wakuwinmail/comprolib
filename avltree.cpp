@@ -319,13 +319,13 @@ void solve(){
         int x,l,r;
         std::cin>>x>>l>>r;
         if(x==0){
-            /*
-            at.range_query(l,r+1,[](node* a){
-                if(a->key>=l&&a->key<=r){
-                    if(a->key==r)a->
-                }
-            })
-            */
+            int* v=at.find(r);
+            at.erase(r);
+            at.range_query(l,r,[](avl_node<int,int>* a){
+                    ++a->key;
+                    return a;
+            });
+            at.insert(l,*v);
         }
         else if(x==1){
             auto ret=at.range_query(l,r+1,[](avl_node<int,int>* a,avl_node<int,int>* b){return a->value<b->value ? a : b;});
