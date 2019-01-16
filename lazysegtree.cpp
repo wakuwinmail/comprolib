@@ -21,7 +21,7 @@ private:
     vector<T> node;
     vector<E> lazy;
 public:
-    explicit LazySegmentTree(
+    explicit LazySegmentTree(//配列で初期化する場合
             int sz,
             F cal,
             G upd,
@@ -40,6 +40,32 @@ public:
         while(n<sz)n=n*2;
         node.resize(static_cast<unsigned int>(2 * n - 1), init[0]);//はみ出る分は0番地に指定
         for (int i = 0; i <sz ; ++i) node[i+n-1]=init[i+1];
+        for (int i = n-2; i >= 0 ; --i) node[i]=f(node[2*i+1],node[2*i+2]);
+
+        lazy.resize(static_cast<unsigned int>(2 * n - 1), opinit);
+        for (int i = 0; i <sz ; ++i) lazy[i+n-1]=opinit;
+        for (int i = n-2; i >= 0 ; --i) lazy[i]=h(lazy[2*i+1],lazy[2*i+2]);
+    }
+
+    explicit LazySegmentTree(//特定の要素で初期化する場合
+            int sz,
+            F cal,
+            G upd,
+            H ecal,
+            P rcal=[](T a,int b){return a;},
+            T initv,
+            E opinitv=0
+    ){
+        n=1;
+        f=cal;
+        g=upd;
+        h=ecal;
+        p=rcal;
+        init=initv;
+        opinit=opinitv;
+        while(n<sz)n=n*2;
+        node.resize(static_cast<unsigned int>(2 * n - 1), init);
+        for (int i = 0; i <sz ; ++i) node[i+n-1]=init;
         for (int i = n-2; i >= 0 ; --i) node[i]=f(node[2*i+1],node[2*i+2]);
 
         lazy.resize(static_cast<unsigned int>(2 * n - 1), opinit);
