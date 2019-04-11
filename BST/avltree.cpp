@@ -4,17 +4,19 @@
 #include <functional>
 
 template<typename T,typename E>
-struct avl_node{
+class avl_node{
 private:
     typedef avl_node<T,E> node;
-
-public:
     T key;
     E value;
     node* left;
     node* right;
     int height;
     int size;
+public:
+    template <typename,typename>
+    friend class AVLTree;
+    friend void solve();
     explicit avl_node(T k,E v,int h){
         key=k;
         value=v;
@@ -26,7 +28,7 @@ public:
 };
 
 template<typename T,typename E>
-struct AVLTree{
+class AVLTree{
 private:
     typedef avl_node<T,E> node;
     typedef std::function<node*(node*,node*)> F;
@@ -220,7 +222,7 @@ private:
 
 public:
     T nth_min(int x=0){//return x-th minimum key, x is 0 indexed
-        return min(root,x)->key;
+        return nth_min(root,x)->key;
     }
 
 private:
@@ -232,10 +234,10 @@ private:
         node* w=u->right;
 
         if(size(v)<x){//go right subtree
-            return min(w,x-1-size(v));
+            return nth_min(w,x-1-size(v));
         }
         else if(size(v)>x){//go left subtree
-            return min(v,x);
+            return nth_min(v,x);
         }
         else {
             return u;
@@ -261,7 +263,7 @@ private:
             node* w=range_query(u->right,l,r,f);
             if(v==nullptr){
                 if(w==nullptr)return u;
-                return f(u,w);
+                else return f(u,w);
             }
             else if(w==nullptr){
                 return f(u,v);
@@ -303,18 +305,19 @@ void solve(){
     }
     */
 
+    
     //http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1508
     int n,q;
     std::cin>>n>>q;
     AVLTree<int,int> at;
-    for(size_t i = 0; i < n; ++i)
+    for(int i = 0; i < n; ++i)
     {
         int a;
         std::cin>>a;
         at.insert(i,a);
     }
     
-    for(size_t i = 0; i < q; ++i)
+    for(int i = 0; i < q; ++i)
     {
         int x,l,r;
         std::cin>>x>>l>>r;
@@ -335,6 +338,7 @@ void solve(){
             at.insert(l,r);
         }
     }
+    
     
 
     /*
