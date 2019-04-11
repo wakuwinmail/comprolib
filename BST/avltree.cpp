@@ -3,6 +3,9 @@
 #include <cassert>
 #include <functional>
 
+template<typename,typename>
+class AVLTree;
+
 template<typename T,typename E>
 class avl_node{
 private:
@@ -14,8 +17,8 @@ private:
     int height;
     int size;
 public:
-    template <typename,typename>
-    friend class AVLTree;
+    //template <typename,typename>
+    friend class AVLTree<T,E>;
     friend void solve();
     explicit avl_node(T k,E v,int h){
         key=k;
