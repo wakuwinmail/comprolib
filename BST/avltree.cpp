@@ -249,6 +249,7 @@ private:
 
 public:
     node* range_query(T l,T r,F f){//[l,r) 2項演算(最小値など) 可換であるもの
+        assert(root!=nullptr);
         return range_query(root,l,r,f);
     }
 
@@ -281,8 +282,8 @@ private:
         if(u->key<l)return range_query(u->right,l,r,g);
         else if(u->key>=r)return range_query(u->left,l,r,g);
         else{
-            node* v=range_query(u->left,l,r,g);
-            node* w=range_query(u->right,l,r,g);
+            range_query(u->left,l,r,g);
+            range_query(u->right,l,r,g);
             return g(u);
         }
     }
@@ -326,15 +327,19 @@ void solve(){
         std::cin>>x>>l>>r;
         if(x==0){
             int* v=at.find(r);
+            int t=*v;
             at.erase(r);
             at.range_query(l,r,[](avl_node<int,int>* a){
-                    ++a->key;
+                    ++(a->key);
+                    //std::cout<<a->key<<" "<<a->value<<std::endl;
                     return a;
             });
-            at.insert(l,*v);
+            //std::cout<<l<<" "<<t<<std::endl;
+            at.insert(l,t);
         }
         else if(x==1){
             auto ret=at.range_query(l,r+1,[](avl_node<int,int>* a,avl_node<int,int>* b){return a->value<b->value ? a : b;});
+            assert(ret!=nullptr);
             std::cout<<ret->value<<std::endl;
         }
         else{
@@ -367,6 +372,7 @@ void solve(){
     }
     */
     
+
 }
 
 int main(){
