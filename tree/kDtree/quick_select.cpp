@@ -1,3 +1,4 @@
+//https://en.wikipedia.org/wiki/Median_of_medians
 #include <vector>
 
 template<typename V>
@@ -31,7 +32,7 @@ V select(std::vector<V> data,int k,int start,int end){
 template<typename V>
 V partition(std::vector<V> data,int start,int end,int pivot){
     V pivotValue=data[pivot];
-    
+
 }
 
 //dataの[start,end]からpivot値を計算する
