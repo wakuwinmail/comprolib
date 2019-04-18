@@ -22,8 +22,7 @@ template<typename V>
 int select(std::vector<V>& data,int k,int start,int end){
     int pivotIndex=-1;
     while(start!=end){
-        int pivotIndex=pivot(data,start,end);
-
+        pivotIndex=pivot(data,start,end);
         pivotIndex=partition(data,start,end,pivotIndex,k);
 
         if(pivotIndex==k)return k;
@@ -71,7 +70,7 @@ int pivot(std::vector<V>& data,int start,int end){
         return median5(data,start,end);
     }
 
-    for(int i=start;i<end;i+=5){
+    for(int i=start;i<=end;i+=5){
         int substart=i;
         int subend=i+4<end?end:i+4;//max(i+4,end)
 
@@ -94,7 +93,7 @@ int median5(std::vector<V>& data,int start,int end){
             --j;
         }
     }
-    return ((start+end)/2);
+    return (start+end)/2;
 }
 
 int main(){
@@ -106,7 +105,7 @@ int main(){
         int k;
         std::cin>>k;
         --k;
-        std::cout<<d[select(d,k,0,n-1)];
+        std::cout<<d[select(d,k,0,n-1)]<<std::endl;
     }
     return 0;
 }
