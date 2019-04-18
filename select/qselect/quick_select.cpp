@@ -1,5 +1,6 @@
 //https://en.wikipedia.org/wiki/Median_of_medians
 #include <iostream>
+#include <cstdio>
 #include <vector>
 #include <utility>
 
@@ -100,7 +101,7 @@ int main(){
     int n,q;
     std::cin>>n>>q;
     std::vector<int> d(n);
-    for(int i=0;i<n;++i)std::cin>>d[i];
+    for(int i=0;i<n;++i)scanf("%d",&d[i]);
     for(int i=0;i<q;++i){
         int k;
         std::cin>>k;
