@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cassert>
 #include <functional>
+#include <cstdio>
 
 template<typename,typename>
 class AVLTree;
@@ -317,14 +318,14 @@ void solve(){
     for(int i = 0; i < n; ++i)
     {
         int a;
-        std::cin>>a;
+        scanf("%d",&a);
         at.insert(i,a);
     }
     
     for(int i = 0; i < q; ++i)
     {
         int x,l,r;
-        std::cin>>x>>l>>r;
+        scanf("%d%d%d",&x,&l,&r);
         if(x==0){
             int* v=at.find(r);
             int t=*v;
@@ -340,7 +341,7 @@ void solve(){
         else if(x==1){
             auto ret=at.range_query(l,r+1,[](avl_node<int,int>* a,avl_node<int,int>* b){return a->value<b->value ? a : b;});
             assert(ret!=nullptr);
-            std::cout<<ret->value<<std::endl;
+            printf("%d\n",ret->value);
         }
         else{
             at.insert(l,r);
