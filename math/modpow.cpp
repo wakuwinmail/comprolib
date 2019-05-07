@@ -1,3 +1,4 @@
+//https://atcoder.jp/contests/atc002/tasks/atc002_b
 #include <iostream>
 //cut begin
 template<typename T>
@@ -14,6 +15,8 @@ T modpow(T a,T n,T mod){
 }
 //cut end
 int main(){
-    std::cout<<modpow(3,45,1000000007)<<std::endl;
+    long long n,m,p;
+    std::cin>>n>>m>>p;
+    std::cout<<modpow(n,p,m)<<std::endl;
     return 0;
 }
