@@ -3,7 +3,7 @@
 #include <cassert>
 #include <functional>
 #include <cstdio>
-
+//cut begin
 template<typename,typename>
 class AVLTree;
 
@@ -289,7 +289,7 @@ private:
         }
     }
 };
-
+//cut end
 void solve(){
     /*
     //https://atcoder.jp/contests/arc033/tasks/arc033_3

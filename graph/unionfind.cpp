@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-
+//cut begin
 struct UnionFind{
 private:
     std::vector<int> par;
@@ -41,7 +41,7 @@ public:
         }
     }
 };
-
+//cut end
 void solve(){
     int n,q;
     std::cin>>n>>q;

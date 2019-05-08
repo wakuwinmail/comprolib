@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <functional>
-
+//cut begin
 template <typename T,typename E>
 struct SegmentTree{
 private:
@@ -50,7 +50,7 @@ public:
         return f(query(p,q,2*k+1,l,(l+r)/2),query(p,q,2*k+2,(l+r)/2,r));
     }
 };
-
+//cut end
 void solve(){
     int n,q;
     std::cin>>n>>q;

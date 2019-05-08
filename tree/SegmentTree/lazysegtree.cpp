@@ -3,7 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
-
+//cut begin
 template <typename T,typename E>
 struct LazySegmentTree{
 private:
@@ -109,7 +109,7 @@ public:
         lazy[k]=opinit;
     }
 };
-
+//cut end
 void solve(){
     int n,q;
     std::cin>>n>>q;
