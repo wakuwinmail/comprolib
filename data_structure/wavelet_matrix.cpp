@@ -24,9 +24,10 @@ private:
     std::vector<std::vector<int>> bitsum;
     std::vector<int> bitcnt;
     std::unordered_map<T,int> startind;
+    int maxdigit;
 public:
     explicit WaveletMatrix(std::vector<T> &init,size_t maxv=std::numeric_limits<size_t>::max()){
-        int maxdigit=0;
+        maxdigit=0;
         int n=init.size();
         int bcnt=0;
         while(maxv>0){
@@ -79,21 +80,20 @@ public:
             pbit0=tbit0;pbit1=tbit1;
             bitcnt[maxdigit-i]=bcnt;
         }
-        startind[pbit0[0]]=0;
+        startind[init[pbit0[0]]]=1;
         for (int i = 1; i < pbit0.size(); i++){
             if(pbit0[i-1]==pbit0[i])continue;
-            startind[pbit0[i]]=i;
+            startind[init[pbit0[i]]]=i;
         }
         startind[pbit1[0]]=pbit0.size();
         for (int i = 1; i < pbit1.size(); i++){
             if(pbit1[i-1]==pbit1[i])continue;
-            startind[pbit1[i]]=i+pbit0.size();
+            startind[init[pbit1[i]]]=i+pbit0.size();
         }
     }
 
     T access(int ind){
         int ret=0;
-        int maxdigit=bitmatrix.size();
         int nind=ind;
         for (int i = maxdigit; i > 0; --i){
             ret+=pow2(i-1)*bitmatrix[maxdigit-i][nind];
@@ -107,23 +107,38 @@ public:
     }
 
     int rank(int t,T c){//t:0-indexed,[0,t]
-
+        std::vector<bool> tbit(maxdigit,false);
+        int nind=t;
+        int cc=c;
+        for (int i = 0; i < maxdigit; ++i){
+            if(cc%2==1){
+                tbit[maxdigit-1-i]=true;
+                --cc;
+            }
+            cc=cc/2;
+        }
+        for (int i = 0; i < maxdigit; ++i){
+            if(tbit[i])nind=bitsum[i][nind]+bitcnt[i];
+            else nind=nind-bitsum[i][nind];
+            std::cout<<nind<<std::endl;
+        }
+        return nind-startind[c]+1;
     }
 
 };
 
 //cut end
 void solve(){
-    int n;
-    std::cin>>n;
+    int n,m;
+    std::cin>>n>>m;
     std::vector<int> a(n);
     for(int i=0;i<n;++i)std::cin>>a[i];
-    WaveletMatrix<int> wm(a,6);
-    int q,k;
+    WaveletMatrix<int> wm(a,m);
+    int q,k,c;
     std::cin>>q;
     for(int i=0;i<q;++i){
-        std::cin>>k;
-        std::cout<<wm.access(k)<<std::endl;
+        std::cin>>k>>c;
+        std::cout<<wm.rank(k,c)<<std::endl;
     }
 }
 
