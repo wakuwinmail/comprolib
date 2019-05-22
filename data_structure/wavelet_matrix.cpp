@@ -22,6 +22,8 @@ struct WaveletMatrix{
 private:
     std::vector<std::vector<short>> bitmatrix;
     std::vector<std::vector<int>> bitsum;
+    std::vector<std::vector<int>> bitselect0;
+    std::vector<std::vector<int>> bitselect1;
     std::vector<int> bitcnt;
     std::unordered_map<T,int> startind;
     int maxdigit;
@@ -37,18 +39,27 @@ public:
         }
         bitmatrix.resize(maxdigit);
         bitsum.resize(maxdigit);
+        bitselect0.resize(maxdigit);
+        bitselect1.resize(maxdigit);
+
         bitmatrix[0].resize(n);
         bitsum[0].assign(n+1,0);
+        bitselect0[0].emplace_back(0);
+        bitselect1[0].emplace_back(0);
+
         bitcnt.resize(maxdigit);
         std::vector<int> pbit0;
         std::vector<int> pbit1;
+
         for (int i = 0; i < n; i++){
             if(init[i]&(1<<(maxdigit-1))){
                 bitmatrix[0][i]=1;
+                bitselect1[0].emplace_back(i);
                 pbit1.emplace_back(i);
             }
             else {
                 bitmatrix[0][i]=0;
+                bitselect0[0].emplace_back(i);
                 pbit0.emplace_back(i);
                 ++bcnt;
             }
@@ -58,13 +69,21 @@ public:
         for (int i = maxdigit-1; i > 0; --i){
             bcnt=0;
             bitsum[maxdigit-i].assign(n+1,0);
+            bitselect0[maxdigit-i].emplace_back(0);
+            bitselect1[maxdigit-i].emplace_back(0);
             std::vector<int> tbit0,tbit1;
             for (int j = 0; j < pbit0.size(); j++){
                 int ind=pbit0[j];
                 int tb=init[ind]&(1<<(i-1));
                 bcnt+=(tb==0?1:0);
-                if(tb)tbit1.emplace_back(ind);
-                else tbit0.emplace_back(ind);
+                if(tb){
+                    bitselect1[maxdigit-i].emplace_back(j);
+                    tbit1.emplace_back(ind);
+                }
+                else{
+                    bitselect0[maxdigit-i].emplace_back(j);
+                    tbit0.emplace_back(ind);
+                }
                 bitmatrix[maxdigit-i].emplace_back(tb==0?0:1);
                 bitsum[maxdigit-i][j+1]=bitsum[maxdigit-i][j]+bitmatrix[maxdigit-i][j];
             }
@@ -72,22 +91,28 @@ public:
                 int ind=pbit1[j];
                 int tb=init[ind]&(1<<(i-1));
                 bcnt+=(tb==0?1:0);
-                if(tb)tbit1.emplace_back(ind);
-                else tbit0.emplace_back(ind);
+                if(tb){
+                    bitselect1[maxdigit-i].emplace_back(j+pbit0.size());
+                    tbit1.emplace_back(ind);
+                }
+                else{
+                    bitselect0[maxdigit-i].emplace_back(j+pbit0.size());
+                    tbit0.emplace_back(ind);
+                }
                 bitmatrix[maxdigit-i].emplace_back(tb==0?0:1);
                 bitsum[maxdigit-i][pbit0.size()+j+1]=bitsum[maxdigit-i][pbit0.size()+j]+bitmatrix[maxdigit-i][pbit0.size()+j];
             }
             pbit0=tbit0;pbit1=tbit1;
             bitcnt[maxdigit-i]=bcnt;
         }
-        startind[init[pbit0[0]]]=1;
+        startind[init[pbit0[0]]]=0;
         for (int i = 1; i < pbit0.size(); i++){
-            if(pbit0[i-1]==pbit0[i])continue;
+            if(init[pbit0[i-1]]==init[pbit0[i]])continue;
             startind[init[pbit0[i]]]=i;
         }
-        startind[pbit1[0]]=pbit0.size();
+        startind[init[pbit1[0]]]=pbit0.size();
         for (int i = 1; i < pbit1.size(); i++){
-            if(pbit1[i-1]==pbit1[i])continue;
+            if(init[pbit1[i-1]]==init[pbit1[i]])continue;
             startind[init[pbit1[i]]]=i+pbit0.size();
         }
     }
@@ -106,25 +131,39 @@ public:
         return ret;
     }
 
+private:
+    void bitcul(T c,std::vector<bool> &tbit){
+        for (int i = maxdigit-1; i >= 0; --i){
+            if(c%2==1){
+                tbit[i]=true;
+                --c;
+            }
+            c=c/2;
+        }
+    }
+public:
     int rank(int t,T c){//t:0-indexed,[0,t]
         std::vector<bool> tbit(maxdigit,false);
-        int nind=t;
-        int cc=c;
+        bitcul(c,tbit);
         for (int i = 0; i < maxdigit; ++i){
-            if(cc%2==1){
-                tbit[maxdigit-1-i]=true;
-                --cc;
-            }
-            cc=cc/2;
+            if(tbit[i])t=bitsum[i][t]+bitcnt[i];
+            else t=t-bitsum[i][t];
+            //std::cout<<t<<std::endl;
         }
-        for (int i = 0; i < maxdigit; ++i){
-            if(tbit[i])nind=bitsum[i][nind]+bitcnt[i];
-            else nind=nind-bitsum[i][nind];
-            std::cout<<nind<<std::endl;
-        }
-        return nind-startind[c]+1;
+        return t-startind[c];
     }
 
+    int select(int t,T c){//t番目のc
+        std::vector<bool> tbit(maxdigit,false);
+        bitcul(c,tbit);
+        t=startind[c]+t-1;
+        for (int i = maxdigit-1; i >= 0; --i){
+            std::cout<<t<<std::endl;
+            if(tbit[i])t=bitselect1[i][t-bitcnt[i]+1];
+            else t=bitselect0[i][t+1];
+        }
+        return t;
+    }
 };
 
 //cut end
@@ -138,7 +177,7 @@ void solve(){
     std::cin>>q;
     for(int i=0;i<q;++i){
         std::cin>>k>>c;
-        std::cout<<wm.rank(k,c)<<std::endl;
+        std::cout<<wm.select(k,c)<<std::endl;
     }
 }
 
