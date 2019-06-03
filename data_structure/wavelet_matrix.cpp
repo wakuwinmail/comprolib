@@ -25,6 +25,7 @@ private:
     std::vector<std::vector<int>> bitselect0;
     std::vector<std::vector<int>> bitselect1;
     std::vector<int> bitcnt;
+    std::vector<T> lastval;
     std::unordered_map<T,int> startind;
     int maxdigit;
 public:
@@ -105,13 +106,17 @@ public:
             pbit0=tbit0;pbit1=tbit1;
             bitcnt[maxdigit-i]=bcnt;
         }
+        lastval.emplace_back(init[pbit0[0]]);
         startind[init[pbit0[0]]]=0;
         for (int i = 1; i < pbit0.size(); i++){
+            lastval.emplace_back(init[pbit0[i]]);
             if(init[pbit0[i-1]]==init[pbit0[i]])continue;
             startind[init[pbit0[i]]]=i;
         }
+        lastval.emplace_back(init[pbit1[0]]);
         startind[init[pbit1[0]]]=pbit0.size();
         for (int i = 1; i < pbit1.size(); i++){
+            lastval.emplace_back(init[pbit1[i]]);
             if(init[pbit1[i-1]]==init[pbit1[i]])continue;
             startind[init[pbit1[i]]]=i+pbit0.size();
         }
@@ -126,7 +131,6 @@ public:
                 nind=nind-bitsum[maxdigit-i][nind+1];
             }
             else nind=bitcnt[maxdigit-i]+bitsum[maxdigit-i][nind];
-
         }
         return ret;
     }
@@ -141,6 +145,7 @@ private:
             c=c/2;
         }
     }
+
 public:
     int rank(int t,T c){//t:0-indexed,[0,t]
         std::vector<bool> tbit(maxdigit,false);
@@ -153,7 +158,7 @@ public:
         return t-startind[c];
     }
 
-    int select(int t,T c){//t番目のc
+    int select(int t,T c){//t番目のc,0-indexed
         std::vector<bool> tbit(maxdigit,false);
         bitcul(c,tbit);
         t=startind[c]+t-1;
@@ -164,6 +169,24 @@ public:
         }
         return t;
     }
+
+    T quantile(int l,int r,int k){//[l,r]で小さい方からk個目,0-indexed
+        for (int i = 0; i < maxdigit; ++i){
+            int bit0=r-l+1-(bitsum[i][r+1]-bitsum[i][l]);
+            if(bit0<k){
+                r=r+1-l-bit0;
+                l=bitcnt[i]+bitsum[i][l];
+                r+=l-1;
+                k-=bit0;
+            }
+            else{
+                l=l-bitsum[i][l];
+                r=l+bit0-1;
+            }
+            //std::cout<<l<<" "<<r<<" "<<k<<std::endl;
+        }
+        return lastval[l+k-1];
+    }
 };
 
 //cut end
@@ -173,11 +196,11 @@ void solve(){
     std::vector<int> a(n);
     for(int i=0;i<n;++i)std::cin>>a[i];
     WaveletMatrix<int> wm(a,m);
-    int q,k,c;
+    int q,k,c,l,r;
     std::cin>>q;
     for(int i=0;i<q;++i){
-        std::cin>>k>>c;
-        std::cout<<wm.select(k,c)<<std::endl;
+        std::cin>>l>>r>>k;
+        std::cout<<wm.quantile(l,r,k)<<std::endl;
     }
 }
 
