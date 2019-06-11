@@ -1,11 +1,17 @@
+//http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2426
 #include <iostream>
 #include <vector>
 #include <unordered_map>
 #include <limits>
+#include <algorithm>
+#include <utility>
+#include <map>
+#include <cassert>
 
-size_t pow2(int n){
-    size_t ret=1;
-    size_t a=2;
+//cut begin
+uintmax_t pow2(int n){
+    uintmax_t ret=1;
+    uintmax_t a=2;
     while(n>0){
         if((n&1)!=0){//n%2==1
             ret=ret*a;
@@ -16,7 +22,6 @@ size_t pow2(int n){
     return ret;
 }
 
-//cut begin
 template<typename T>
 struct WaveletMatrix{
 private:
@@ -29,7 +34,7 @@ private:
     std::unordered_map<T,int> startind;
     int maxdigit;
 public:
-    explicit WaveletMatrix(std::vector<T> &init,size_t maxv=std::numeric_limits<size_t>::max()){
+    explicit WaveletMatrix(std::vector<T> &init,uintmax_t maxv=std::numeric_limits<uintmax_t>::max()){
         maxdigit=0;
         int n=init.size();
         int bcnt=0;
@@ -147,7 +152,7 @@ private:
     }
 
 public:
-    int rank(int t,T c){//t:0-indexed,[0,t]
+    int rank(int t,T c){//cの個数,t:0-indexed,[0,t]
         std::vector<bool> tbit(maxdigit,false);
         bitcul(c,tbit);
         for (int i = 0; i < maxdigit; ++i){
@@ -169,7 +174,7 @@ public:
         }
         return t;
     }
-
+public:
     T quantile(int l,int r,int k){//[l,r]で小さい方からk個目,0-indexed
         for (int i = 0; i < maxdigit; ++i){
             int bit0=r-l+1-(bitsum[i][r+1]-bitsum[i][l]);
@@ -187,20 +192,64 @@ public:
         }
         return lastval[l+k-1];
     }
+
+    int range_l(int l,int r,T v){//[l,r]でv以下のものの個数,0-indexed
+        std::vector<bool> tbit(maxdigit,false);
+        bitcul(v,tbit);
+        int ret=0;
+        for(int i=0;i < maxdigit; ++i){
+            int range=r+1-l;
+            int bit1=bitsum[i][r+1]-bitsum[i][l];
+            if(tbit[i]){//0は全部ok(1だけ残す)
+                ret+=range-(bit1);//0のものは全部加算
+                l=bitcnt[i]+bitsum[i][l]-bitsum[i][0];//0の個数+lより左にある1の個数
+                r=l+bit1-1;//[l,r]にある1の個数
+            }
+            else{//1は全部ng(0だけ残す)
+                l=l-(bitsum[i][l]-bitsum[i][0]);//lより左にある0の個数
+                r=l+range-(bit1)-1;//[l,r]にある0の個数
+            }
+            //std::cout<<l<<" "<<r<<" "<<ret<<std::endl;
+        }
+        ret+=r+1-l;
+        return ret;
+    }
+
+    int range_freq(int l,int r,T a,T b){//[l,r]で[a,b]の個数,0-indexed
+        return range_l(l,r,b)-range_l(l,r,a)+rank(lastval.size(),a);
+    }
 };
 
 //cut end
 void solve(){
+    constexpr int ground=1000000000;
     int n,m;
     std::cin>>n>>m;
-    std::vector<int> a(n);
-    for(int i=0;i<n;++i)std::cin>>a[i];
-    WaveletMatrix<int> wm(a,m);
-    int q,k,c,l,r;
-    std::cin>>q;
-    for(int i=0;i<q;++i){
-        std::cin>>l>>r>>k;
-        std::cout<<wm.quantile(l,r,k)<<std::endl;
+    std::vector<std::pair<int,int>> treasure(n);
+    for(int i=0;i < n; ++i){
+        int x,y;
+        std::cin>>x>>y;
+        treasure[i]=std::make_pair(x+ground,y+ground);
+    }
+    std::sort(treasure.begin(),treasure.end());
+    std::vector<int> a(n+1);
+    std::map<int,int> za;//F:x-pos,S:index
+    for(int i=1;i <= n; ++i){
+        a[i]=treasure[i-1].second;
+        za[a[i]]=i;
+        std::cout<<a[i]<<std::endl;
+    }
+    WaveletMatrix<int> wm(a,std::numeric_limits<int>::max());
+    for(int i=0;i < m; ++i){
+        int x1,y1,x2,y2;
+        std::cin>>x1>>y1>>x2>>y2;
+        x1+=ground;y1+=ground;x2+=ground;y2+=ground;
+        auto itl=za.lower_bound(x1);
+        auto itr=za.upper_bound(x2);
+        --itr;
+        int ta=a[itl->second],tb=a[itr->second];
+        //std::cout<<"OK"<<std::endl;
+        std::cout<<wm.range_freq(ta,tb,y1,y2)<<std::endl;;
     }
 }
 
