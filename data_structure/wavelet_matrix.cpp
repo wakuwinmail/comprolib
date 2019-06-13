@@ -25,6 +25,7 @@ uintmax_t pow2(int n){
 template<typename T>
 struct WaveletMatrix{
 private:
+    int valcnt;
     std::vector<std::vector<short>> bitmatrix;
     std::vector<std::vector<int>> bitsum;
     std::vector<std::vector<int>> bitselect0;
@@ -37,6 +38,7 @@ public:
     explicit WaveletMatrix(std::vector<T> &init,uintmax_t maxv=std::numeric_limits<uintmax_t>::max()){
         maxdigit=0;
         int n=init.size();
+        valcnt=n;
         int bcnt=0;
         while(maxv>0){
             if(maxv%2==1)--maxv;
@@ -152,13 +154,13 @@ private:
     }
 
 public:
-    int rank(int t,T c){//cの個数,t:0-indexed,[0,t]
+    int rank(int t,T c){//[0,t]でcの個数,t:0-indexed
         std::vector<bool> tbit(maxdigit,false);
         bitcul(c,tbit);
         for (int i = 0; i < maxdigit; ++i){
             if(tbit[i])t=bitsum[i][t]+bitcnt[i];
             else t=t-bitsum[i][t];
-            //std::cout<<t<<std::endl;
+            //std::cout<<"t:"<<t<<std::endl;
         }
         return t-startind[c];
     }
@@ -196,12 +198,20 @@ public:
     int range_l(int l,int r,T v){//[l,r]でv以下のものの個数,0-indexed
         std::vector<bool> tbit(maxdigit,false);
         bitcul(v,tbit);
+        //std::cout<<"OK"<<std::endl;
         int ret=0;
+        //std::cout<<l<<" "<<r<<" "<<v<<std::endl;
         for(int i=0;i < maxdigit; ++i){
+            //if(l==r)std::cout<<"hoge:"<<ret<<std::endl;
+            if(r<l){
+                //std::cout<<"hoge"<<std::endl;
+                return ret;
+            }
             int range=r+1-l;
             int bit1=bitsum[i][r+1]-bitsum[i][l];
             if(tbit[i]){//0は全部ok(1だけ残す)
                 ret+=range-(bit1);//0のものは全部加算
+                //std::cout<<"huga:"<<range<<" "<<bit1<<" "<<i<<std::endl;
                 l=bitcnt[i]+bitsum[i][l]-bitsum[i][0];//0の個数+lより左にある1の個数
                 r=l+bit1-1;//[l,r]にある1の個数
             }
@@ -215,8 +225,27 @@ public:
         return ret;
     }
 
-    int range_freq(int l,int r,T a,T b){//[l,r]で[a,b]の個数,0-indexed
-        return range_l(l,r,b)-range_l(l,r,a)+rank(lastval.size(),a);
+    int range_freq(int l,int r,T a,T b){//[l,r]で[a,b]の個数,l,r:0-indexed
+        if(l<0)l=0;
+        if(r>=valcnt)r=valcnt-1;
+        int ret=range_l(l,r,b);
+        std::cout<<ret<<std::endl;
+        //std::cout<<"a:"<<a<<std::endl;
+        ret-=range_l(l,r,a);
+        std::cout<<ret<<std::endl;
+        ret+=rank(r+1,a);
+        std::cout<<ret<<std::endl;
+        ret-=rank(l,a);
+        return ret;
+    }
+
+public:
+    void printmatrix(int k){//k段目を全部見る
+        std::cout<<k<<std::endl;
+        for(int i=0;i < valcnt; ++i){
+            std::cout<<bitmatrix[k][i]<<" ";
+        }
+        std::cout<<std::endl;
     }
 };
 
@@ -232,11 +261,11 @@ void solve(){
         treasure[i]=std::make_pair(x+ground,y+ground);
     }
     std::sort(treasure.begin(),treasure.end());
-    std::vector<int> a(n+1);
+    std::vector<int> a(n);
     std::map<int,int> za;//F:x-pos,S:index
-    for(int i=1;i <= n; ++i){
-        a[i]=treasure[i-1].second;
-        za[a[i]]=i;
+    for(int i=0;i < n; ++i){
+        a[i]=treasure[i].second;
+        za[treasure[i].first]=i;
         std::cout<<a[i]<<std::endl;
     }
     WaveletMatrix<int> wm(a,std::numeric_limits<int>::max());
@@ -244,12 +273,15 @@ void solve(){
         int x1,y1,x2,y2;
         std::cin>>x1>>y1>>x2>>y2;
         x1+=ground;y1+=ground;x2+=ground;y2+=ground;
+        //std::cout<<x1<<" "<<x2<<std::endl;
         auto itl=za.lower_bound(x1);
         auto itr=za.upper_bound(x2);
         --itr;
-        int ta=a[itl->second],tb=a[itr->second];
+        int ta=itl->second,tb=itr->second;
+        std::cout<<ta<<" "<<tb<<std::endl;
         //std::cout<<"OK"<<std::endl;
-        std::cout<<wm.range_freq(ta,tb,y1,y2)<<std::endl;;
+        std::cout<<wm.range_freq(ta,tb,y1,y2)<<std::endl;
+        //wm.printmatrix(1);
     }
 }
 
@@ -257,3 +289,6 @@ int main(){
     solve();
     return 0;
 }
+
+//111011100110101100101000000001
+//111011100110101100101000000000
