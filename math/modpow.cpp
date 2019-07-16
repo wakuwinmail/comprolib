@@ -2,7 +2,7 @@
 #include <iostream>
 //cut begin
 template<typename T>
-T modpow(T a,T n,T mod){//(a^n)%MOD
+constexpr T modpow(T a,T n,T mod){//(a^n)%MOD
     T ret=1;
     while(n>0){
         if((n&1)!=0){//n%2==1
