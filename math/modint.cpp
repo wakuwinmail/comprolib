@@ -77,18 +77,30 @@ public:
         return *this;
     }
 
-    
+    constexpr ModInt operator- (){
+        if(a==0)return 0;
+        else return ModInt(Mod-a);
+    }
+
+
 };
 
+using Mi=ModInt<1000000007ull>;
+
+Mi operator"" _mi(unsigned long long n){
+    return Mi(n);
+}
+
 int main(){
-    using Mi=ModInt<1000000007>;
-    Mi mi(2);
-    mi+=Mi(4);
+    int n;
+    std::cin>>n;
+    Mi mi(n);
+    mi+=-4_mi;
     std::cout<<mi.value()<<std::endl;
-    mi-=Mi(5);
+    mi-=5_mi;
     std::cout<<mi.value()<<std::endl;
-    mi*=Mi(8);
+    mi*=8_mi;
     std::cout<<mi.value()<<std::endl;
-    mi/=Mi(2);
+    mi/=2_mi;
     std::cout<<mi.value()<<std::endl;
 }
