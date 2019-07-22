@@ -7,9 +7,9 @@ private:
     T id;
 public:
     monoid(F f,T id):cal(f),id(id){}
-    T product(T a,T b){
+    static T operator()(T a,T b){
         return cal(a,b);
     }
-    T get_id(){return id;}
+    static T get_id(){return id;}
 };
 //cut end
