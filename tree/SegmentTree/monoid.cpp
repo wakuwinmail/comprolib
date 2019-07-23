@@ -7,9 +7,9 @@ private:
     T id;
 public:
     monoid(F f,T id):cal(f),id(id){}
-    static T operator()(T a,T b){
+    constexpr T operator()(T a,T b){
         return cal(a,b);
     }
-    static T get_id(){return id;}
+    constexpr T get_id(){return id;}
 };
 //cut end

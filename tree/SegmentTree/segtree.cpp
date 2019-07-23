@@ -28,7 +28,7 @@ public:
         while(n<sz)n=n*2;
         node.resize(static_cast<unsigned int>(2 * n - 1), mono.get_id());
         for (int i = 0; i <sz ; ++i) node[i+n-1]=mono.get_id();
-        for (int i = n-2; i >= 0 ; --i) node[i]=mono.product(node[2*i+1],node[2*i+2]);
+        for (int i = n-2; i >= 0 ; --i) node[i]=mono(node[2*i+1],node[2*i+2]);
     }
 
     explicit SegmentTree(
@@ -42,7 +42,7 @@ public:
         while(n<sz)n=n*2;
         node.resize(static_cast<unsigned int>(2 * n - 1), mono.get_id());
         for (int i = 0; i <sz ; ++i) node[i+n-1]=init[i+1];
-        for (int i = n-2; i >= 0 ; --i) node[i]=mono.product(node[2*i+1],node[2*i+2]);
+        for (int i = n-2; i >= 0 ; --i) node[i]=mono(node[2*i+1],node[2*i+2]);
     }
 
     void update(int x, E val){//x:0-indexed
@@ -50,7 +50,7 @@ public:
         node[x]=upd(node[x],val);
         while(x>0){
             x=(x-1)/2;
-            node[x]=mono.product(node[2*x+1],node[2*x+2]);
+            node[x]=mono(node[2*x+1],node[2*x+2]);
         }
     }
 
@@ -59,7 +59,7 @@ public:
         if(r<=p||l>=q)return mono.get_id();//out of range
         if(p<=l&&r<=q)return node[k];
 
-        return mono.product(query(p,q,2*k+1,l,(l+r)/2),query(p,q,2*k+2,(l+r)/2,r));
+        return mono(query(p,q,2*k+1,l,(l+r)/2),query(p,q,2*k+2,(l+r)/2,r));
     }
 };
 //cut end
@@ -71,7 +71,7 @@ void solve(){
         mono,
         [](int a,int b){return b;}
     );
-    for(size_t i = 0; i < q; i++)
+    for(int i = 0; i < q; i++)
     {
         int com,x,y;
         std::cin>>com>>x>>y;
