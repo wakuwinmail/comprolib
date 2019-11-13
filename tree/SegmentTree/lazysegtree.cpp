@@ -12,11 +12,11 @@ private:
     typedef std::function<E(E,E)> H;
     typedef std::function<E(E,int)> P;
     int n;
-    std::vector<T> init;
     F cal;//function for merge
     G upd;//function for update
     H ecal;//function for evaluate
     P rcal;//function for range calculate
+    std::vector<T> init;
     T initv;
     E opinit;
     std::vector<T> node;
@@ -29,7 +29,7 @@ public:
             H ecal,
             P rcal=[](T a,int b){return a;},
             std::vector<T> init=std::vector<T>(1,0),
-            E opinitv=0
+            E opinit=0
     ):
     cal(cal),
     upd(upd),
@@ -39,9 +39,7 @@ public:
     opinit(opinit)
     {
         n=1;
-        init=init;
         initv=init[0];
-        opinit=opinitv;
         while(n<sz)n=n*2;
         node.resize(static_cast<unsigned int>(2 * n - 1), init[0]);//はみ出る分は0番地に指定
         for (int i = 0; i <sz ; ++i) node[i+n-1]=init[i+1];
