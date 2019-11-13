@@ -12,14 +12,14 @@ private:
     typedef std::function<E(E,E)> H;
     typedef std::function<E(E,int)> P;
     int n;
-    vector<T> init;
+    std::vector<T> init;
     E opinit;
     F f;//function for merge
     G g;//function for update
     H h;//function for evaluate
     P p;//function for range calculate
-    vector<T> node;
-    vector<E> lazy;
+    std::vector<T> node;
+    std::vector<E> lazy;
 public:
     explicit LazySegmentTree(//配列で初期化する場合
             int sz,
@@ -27,7 +27,7 @@ public:
             G upd,
             H ecal,
             P rcal=[](T a,int b){return a;},
-            vector<T> initv=vector<T>(1,0),
+            std::vector<T> initv=std::vector<T>(1,0),
             E opinitv=0
     ){
         n=1;
@@ -53,7 +53,7 @@ public:
             G upd,
             H ecal,
             P rcal=[](T a,int b){return a;},
-            T initv,
+            T initv=0,
             E opinitv=0
     ){
         n=1;
@@ -61,11 +61,10 @@ public:
         g=upd;
         h=ecal;
         p=rcal;
-        init=initv;
         opinit=opinitv;
         while(n<sz)n=n*2;
-        node.resize(static_cast<unsigned int>(2 * n - 1), init);
-        for (int i = 0; i <sz ; ++i) node[i+n-1]=init;
+        node.resize(static_cast<unsigned int>(2 * n - 1), initv);
+        for (int i = 0; i <sz ; ++i) node[i+n-1]=initv;
         for (int i = n-2; i >= 0 ; --i) node[i]=f(node[2*i+1],node[2*i+2]);
 
         lazy.resize(static_cast<unsigned int>(2 * n - 1), opinit);
