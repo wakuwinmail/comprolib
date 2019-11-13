@@ -13,11 +13,12 @@ private:
     typedef std::function<E(E,int)> P;
     int n;
     std::vector<T> init;
+    F cal;//function for merge
+    G upd;//function for update
+    H ecal;//function for evaluate
+    P rcal;//function for range calculate
+    T initv;
     E opinit;
-    F f;//function for merge
-    G g;//function for update
-    H h;//function for evaluate
-    P p;//function for range calculate
     std::vector<T> node;
     std::vector<E> lazy;
 public:
@@ -27,24 +28,28 @@ public:
             G upd,
             H ecal,
             P rcal=[](T a,int b){return a;},
-            std::vector<T> initv=std::vector<T>(1,0),
+            std::vector<T> init=std::vector<T>(1,0),
             E opinitv=0
-    ){
+    ):
+    cal(cal),
+    upd(upd),
+    ecal(ecal),
+    rcal(rcal),
+    init(init),
+    opinit(opinit)
+    {
         n=1;
-        f=cal;
-        g=upd;
-        h=ecal;
-        p=rcal;
-        init=initv;
+        init=init;
+        initv=init[0];
         opinit=opinitv;
         while(n<sz)n=n*2;
         node.resize(static_cast<unsigned int>(2 * n - 1), init[0]);//はみ出る分は0番地に指定
         for (int i = 0; i <sz ; ++i) node[i+n-1]=init[i+1];
-        for (int i = n-2; i >= 0 ; --i) node[i]=f(node[2*i+1],node[2*i+2]);
+        for (int i = n-2; i >= 0 ; --i) node[i]=cal(node[2*i+1],node[2*i+2]);
 
         lazy.resize(static_cast<unsigned int>(2 * n - 1), opinit);
         for (int i = 0; i <sz ; ++i) lazy[i+n-1]=opinit;
-        for (int i = n-2; i >= 0 ; --i) lazy[i]=h(lazy[2*i+1],lazy[2*i+2]);
+        for (int i = n-2; i >= 0 ; --i) lazy[i]=ecal(lazy[2*i+1],lazy[2*i+2]);
     }
 
     explicit LazySegmentTree(//特定の要素で初期化する場合
@@ -54,22 +59,24 @@ public:
             H ecal,
             P rcal=[](T a,int b){return a;},
             T initv=0,
-            E opinitv=0
-    ){
+            E opinit=0
+    ):
+    cal(cal),
+    upd(upd),
+    ecal(ecal),
+    rcal(rcal),
+    initv(initv),
+    opinit(opinit)
+    {
         n=1;
-        f=cal;
-        g=upd;
-        h=ecal;
-        p=rcal;
-        opinit=opinitv;
         while(n<sz)n=n*2;
         node.resize(static_cast<unsigned int>(2 * n - 1), initv);
         for (int i = 0; i <sz ; ++i) node[i+n-1]=initv;
-        for (int i = n-2; i >= 0 ; --i) node[i]=f(node[2*i+1],node[2*i+2]);
+        for (int i = n-2; i >= 0 ; --i) node[i]=cal(node[2*i+1],node[2*i+2]);
 
         lazy.resize(static_cast<unsigned int>(2 * n - 1), opinit);
         for (int i = 0; i <sz ; ++i) lazy[i+n-1]=opinit;
-        for (int i = n-2; i >= 0 ; --i) lazy[i]=h(lazy[2*i+1],lazy[2*i+2]);
+        for (int i = n-2; i >= 0 ; --i) lazy[i]=ecal(lazy[2*i+1],lazy[2*i+2]);
     }
 
     void update(int p,int q,E val,int k=0,int l=0,int r=-1){//[p,q):0-indexed
@@ -77,33 +84,33 @@ public:
         eval(k,r-l);
         if(r<=p||l>=q)return;
         if(p<=l&&r<=q){
-            lazy[k]=h(lazy[k],val);
+            lazy[k]=ecal(lazy[k],val);
             eval(k,r-l);
         }
         else{
             update(p,q,val,2*k+1,l,(l+r)/2);
             update(p,q,val,2*k+2,(l+r)/2,r);
-            node[k]=f(node[2*k+1],node[2*k+2]);
+            node[k]=cal(node[2*k+1],node[2*k+2]);
         }
     }
 
     T query(int p,int q,int k=0,int l=0,int r=-1){//[p,q):0-indexed
         if(r<0)r=n;
-        if(r<=p||l>=q)return init[0];
+        if(r<=p||l>=q)return initv;
 
         eval(k,r-l);
         if(p<=l&&r<=q)return node[k];
         T vl=query(p,q,2*k+1,l,(l+r)/2);
         T vr=query(p,q,2*k+2,(l+r)/2,r);
-        return f(vl,vr);
+        return cal(vl,vr);
     }
 
     void eval(int k,int len){//k:0-indexed
         if(lazy[k]==opinit)return;
-        node[k]=g(node[k],p(lazy[k],len));
+        node[k]=upd(node[k],rcal(lazy[k],len));
         if(k<n-1){
-            lazy[2*k+1]=h(lazy[2*k+1],lazy[k]);
-            lazy[2*k+2]=h(lazy[2*k+2],lazy[k]);
+            lazy[2*k+1]=ecal(lazy[2*k+1],lazy[k]);
+            lazy[2*k+2]=ecal(lazy[2*k+2],lazy[k]);
         }
         lazy[k]=opinit;
     }
@@ -116,7 +123,7 @@ void solve(){
         std::plus<long>(),
         std::plus<long>(),
         std::plus<long>(),
-        std::multiplies<long>(),
+        [](long a,int b)->long{return a*b;},
         0L,
         0L
     );
