@@ -1,8 +1,10 @@
 //https://atcoder.jp/contests/atc002/tasks/atc002_b
 #include <iostream>
 //cut begin
+long long mod=1000000007LL;
+
 template<typename T>
-constexpr T modpow(T a,T n,T mod){//(a^n)%MOD
+constexpr T modpow(T a,T n){//(a^n)%MOD
     T ret=1;
     while(n>0){
         if((n&1)!=0){//n%2==1
