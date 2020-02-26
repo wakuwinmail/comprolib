@@ -49,6 +49,15 @@ public:
         for(int i = 0; i < n; ++i){
             scset[gp[i]].emplace_back(i);
         }
+        
+        RES.resize(n);
+        for(int i = 0; i < n; ++i){
+            for(auto v: G[i]){
+                int x=gp[i],y=gp[v];
+                if(x==y)continue;
+                RES[x].push_back(y);
+            }
+        }
     }
 
     void dfs(int pos){//帰りがけ順の記録
