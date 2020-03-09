@@ -16,7 +16,7 @@ void combinit(int maxn){
     ifac.resize(maxn);
     fac[0] = 1;
     ifac[0] = 1;
-    for(long long i = 0; i<maxn; i++){
+    for(long long i = 0; i<maxn-1; i++){
         fac[i+1] = fac[i]*(i+1) % mod;
         ifac[i+1] = ifac[i]*modpow(i+1, mod-2) % mod;
     }
