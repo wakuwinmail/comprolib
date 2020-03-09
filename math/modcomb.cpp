@@ -12,11 +12,11 @@ T modcomb(T a, T b){
 }
 
 void combinit(int maxn){
-    fac.resize(maxn);
-    ifac.resize(maxn);
+    fac.resize(maxn+1);
+    ifac.resize(maxn+1);
     fac[0] = 1;
     ifac[0] = 1;
-    for(long long i = 0; i<maxn-1; i++){
+    for(long long i = 0; i<maxn; i++){
         fac[i+1] = fac[i]*(i+1) % mod;
         ifac[i+1] = ifac[i]*modpow(i+1, mod-2) % mod;
     }
