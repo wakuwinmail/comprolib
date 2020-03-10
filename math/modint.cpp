@@ -78,7 +78,7 @@ public:
     }
 
     constexpr ModInt operator- (){
-        if(a==0)return 0;
+        if(a==0)return ModInt(0);
         else return ModInt(Mod-a);
     }
 
