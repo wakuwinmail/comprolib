@@ -61,8 +61,8 @@ public:
     constexpr Matrix operator*(Matrix rhs){
         Matrix<scalarvalue> ret(col,rhs.get_row(),0);
         for(int i = 0; i < col; ++i){
-            for(int j = 0; j < rhs.get_row(); ++j){
-                for(int k = 0; k < row; ++k){
+            for(int k = 0; k < rhs.get_row(); ++k){
+                for(int j = 0; j < row; ++j){
                     ret[i][j]+=data[i][k]*rhs[k][j];
                 }
             }
