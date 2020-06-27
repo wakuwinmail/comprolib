@@ -4,14 +4,14 @@
 struct UnionFind{
 private:
     std::vector<int> par;
-    std::vector<int> rank;
+    std::vector<int> siz;
 public:
     UnionFind(int size){
         par=std::vector<int>(size);
-        rank=std::vector<int>(size);
+        siz=std::vector<int>(size);
         for(int i=0;i<size;++i){
             par[i]=i;
-            rank[i]=1;
+            siz[i]=1;
         }
     }
 
@@ -23,6 +23,10 @@ public:
         }
     }
 
+    int size(int x) {
+        return siz[root(x)];
+    }
+
     bool same(int x,int y){//0-indexed
         return root(x)==root(y);
     }
@@ -32,12 +36,13 @@ public:
         y=root(y);
         if(x==y)return;
 
-        if(rank[x]<rank[y]){
+        if(siz[x]<siz[y]){
             par[x]=y;
+            siz[y]=siz[x];
         }
         else{
             par[y]=x;
-            if(rank[x]==rank[y])++rank[x];
+            siz[x]=siz[y];
         }
     }
 };
