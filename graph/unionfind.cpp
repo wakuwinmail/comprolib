@@ -38,11 +38,11 @@ public:
 
         if(siz[x]<siz[y]){
             par[x]=y;
-            siz[y]=siz[x];
+            siz[y]+=siz[x];
         }
         else{
             par[y]=x;
-            siz[x]=siz[y];
+            siz[x]+=siz[y];
         }
     }
 };
