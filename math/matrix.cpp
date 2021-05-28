@@ -3,19 +3,6 @@
 #include <vector>
 #include <cassert>
 
-struct has_idplus_impl {
-    template <class T>
-    static auto check(T&& x)->decltype(x.idplus(),std::true_type{});
-
-    template <class T>
-    static auto check(...)->std::false_type;
-};
-
-template <class T>
-class has_idplus :
-        public decltype(has_idplus_impl::check<T>(std::declval<T>())) {};
-
-
 template<typename T>
 struct Matrix{
     using scalarvalue=T;
